@@ -1,10 +1,16 @@
 import gymnasium as gym
 import time
+from gymnasium.wrappers import RecordVideo
 import ale_py
 
 def main():
     # Create the environment with human rendering that will display the game in a window
-    env = gym.make("ALE/Pong-v5", render_mode="human")
+    env = gym.make("ALE/Pong-v5", render_mode="rgb_array")
+    
+    # Wrap the environment with RecordVideo
+    # Videos will be saved to './videos/' directory
+    # https://gymnasium.farama.org/main/_modules/gymnasium/wrappers/record_video/
+    env = RecordVideo(env, "videos", episode_trigger=lambda x: True)
     
     # Reset the environment and get initial observation
     observation, info = env.reset()

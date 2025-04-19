@@ -2,7 +2,7 @@ import gymnasium as gym
 import time
 import ale_py
 from data_utils import preprocess_observation_batch
-from policy_neural_network import Policy
+from networks import Policy
 import torch
 import numpy as np
 

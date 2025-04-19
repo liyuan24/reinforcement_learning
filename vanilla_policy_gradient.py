@@ -1,8 +1,7 @@
 import gymnasium as gym
-import time
 import ale_py
 from data_utils import preprocess_observation
-from policy_neural_network import Policy
+from networks import Policy
 import torch
 
 

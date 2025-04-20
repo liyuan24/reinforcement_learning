@@ -111,7 +111,7 @@ def main():
     )
 
     # env setup
-    # set the autoreset mode as NEXT_STEP(default) explicitly so that the readers are aware of the behavior
+    # readers should be aware of the autoreset behavior in vectorized environments, the default behavior is NEXT_STEP
     # for more details check https://farama.org/Vector-Autoreset-Mode
     # and source code https://github.com/Farama-Foundation/Gymnasium/blob/main/gymnasium/vector/sync_vector_env.py
     envs = gym.vector.SyncVectorEnv(

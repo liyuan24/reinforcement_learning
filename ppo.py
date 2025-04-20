@@ -13,7 +13,6 @@ import wandb
 import math
 from dataclasses import dataclass
 
-# reference: https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo.py#L81
 def make_env(env_id, idx, capture_video, run_name):
     def thunk():
         if capture_video and idx == 0:

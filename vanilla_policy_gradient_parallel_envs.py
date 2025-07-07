@@ -6,6 +6,7 @@ from networks import Policy
 import torch
 import numpy as np
 
+
 def discount_rewards(rewards: list[torch.Tensor], gamma: float) -> list[torch.Tensor]:
     """
     Discount the rewards.
@@ -26,6 +27,7 @@ def discount_rewards(rewards: list[torch.Tensor], gamma: float) -> list[torch.Te
         discounted_rewards[i] = running_reward
     return discounted_rewards
 
+
 # reference: https://github.com/vwxyzjn/cleanrl/blob/master/cleanrl/ppo.py#L81
 def make_env(env_id, idx, capture_video, run_name):
     def thunk():
@@ -39,12 +41,13 @@ def make_env(env_id, idx, capture_video, run_name):
 
     return thunk
 
+
 def main():
     # Create the environment with human rendering that will display the game in a window
     num_envs = 10
     run_name = "vanilla_policy_gradient_parallel_envs"
     capture_video = False
-        # env setup
+    # env setup
     envs = gym.vector.SyncVectorEnv(
         [make_env("ALE/Pong-v5", i, capture_video, run_name) for i in range(num_envs)],
     )
@@ -52,7 +55,7 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     checkpoint_save_interval = 100
     checkpoint_save_path = "checkpoints"
-    
+
     model_path = "checkpoints/policy_400.pth"
     # # Initialize the policy network, action space is UP and DOWN
     policy = Policy(input_dim=6400, action_space=2).to(device)
@@ -90,7 +93,9 @@ def main():
             action = torch.multinomial(probs, num_samples=1).view(-1)
 
             # UP is 2 and DOWN is 5: https://ale.farama.org/env-spec/#1
-            pong_action = torch.where(action == 0, torch.tensor(2), torch.tensor(5)).cpu().numpy()
+            pong_action = (
+                torch.where(action == 0, torch.tensor(2), torch.tensor(5)).cpu().numpy()
+            )
 
             # Step the environment
             observation, reward, terminated, truncated, info = envs.step(pong_action)
@@ -104,10 +109,13 @@ def main():
             # each episode may contain multiple rounds of games
             if np.any(terminated) or np.any(truncated):
                 episodes += 1
-                discounted_rewards_tensor = torch.stack(discount_rewards(rewards, gamma)).to(device)
+                discounted_rewards_tensor = torch.stack(
+                    discount_rewards(rewards, gamma)
+                ).to(device)
                 # normalize the discounted rewards for each env
                 discounted_rewards_tensor = (
-                    discounted_rewards_tensor - torch.mean(discounted_rewards_tensor, dim=0, keepdim=True)
+                    discounted_rewards_tensor
+                    - torch.mean(discounted_rewards_tensor, dim=0, keepdim=True)
                 ) / torch.std(discounted_rewards_tensor, dim=0, keepdim=True)
                 # torch.stack can maintain the gradient
                 log_probs_tensor = torch.stack(log_probs)
@@ -136,7 +144,8 @@ def main():
                         "optimizer": optimizer.state_dict(),
                     }
                     torch.save(
-                        checkpoint, f"{checkpoint_save_path}/policy_parallel_envs_{episodes}.pth"
+                        checkpoint,
+                        f"{checkpoint_save_path}/policy_parallel_envs_{episodes}.pth",
                     )
 
                 # print the total rewards
